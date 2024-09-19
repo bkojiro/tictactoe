@@ -19,16 +19,20 @@ int main() {
   bool stillPlaying = true;
   int playerMove = X_MOVE;
   char playerChar = 'X';
+  int grid[3][3] = {{BLANK, BLANK, BLANK},
+                    {BLANK, BLANK, BLANK},
+                    {BLANK, BLANK, BLANK}}; //tictactoe grid in ints
   
   while (playAgain) {
-
     //keep going until tie/player win
-    int grid[3][3] = {{0,0,0},
-                      {0,0,0},
-                      {0,0,0}};
+    for (int y = 0; y < 3; y++) {
+      for (int x = 0; x < 3; x++) {
+	grid[x][y] = BLANK;
+      }
+    }
     gridOut(grid);
     
-    while (stillPlaying) {
+    while (stillPlaying == true) {
 
       //move entering
       cout << "Enter a letter then a number (no spaces)" << endl << "> ";
@@ -37,36 +41,47 @@ int main() {
       cin.get();
       int xTemp;
       int yTemp;
-      xTemp = (int)input[1] - 49;
-      if (input[0] == 'a' || input[0] == 'A') {
+      bool validInput = true;
+      if (input[0] == 'a' || input[0] == 'A') { //convert letter to y position
 	yTemp = 0;
       } else if (input[0] == 'b' || input[0] == 'B') {
 	yTemp = 1;
       } else if (input[0] == 'c' || input[0] == 'C') {
 	yTemp = 2;
-      }
-      if (grid[xTemp][yTemp] == 0) {
-	grid[xTemp][yTemp] = playerMove;
-	gridOut(grid);
-	if (CheckWin(grid, playerMove)) {
-	  //player has won
-	  cout << playerChar << " Player has won!" << endl;
-	  stillPlaying = false;
-	} else if (CheckTie(grid)) {
-	  //players have tied
-	  cout << "Players have tied!" << endl;
-	  stillPlaying = false;
-	} else {
-	  if (playerMove == X_MOVE) {
-	    playerMove = O_MOVE;
-	    playerChar = 'O';
-	  } else {
-	    playerMove = X_MOVE;
-	    playerChar = 'X';
-	  }
-	}
       } else {
-	cout << "This spot is already taken!" << endl;
+	cout << "Invalid first char" << endl;
+	validInput = false;
+      }
+      if (input[1] == '1' || input[1] == '2' || input[1] == '3') { //convert number to x position
+	xTemp = (int)input[1] - 49;
+      } else {
+	cout << "Invalid second char" << endl;
+	validInput = false;
+      }
+      if (validInput) {	//check to see if input is valid
+	if (grid[xTemp][yTemp] == BLANK) {
+	  grid[xTemp][yTemp] = playerMove;
+	  gridOut(grid);
+	  if (CheckWin(grid, playerMove)) {
+	    //player has won
+	    cout << playerChar << " Player has won!" << endl;
+	    stillPlaying = false;
+	  } else if (CheckTie(grid)) {
+	    //players have tied
+	    cout << "Players have tied!" << endl;
+	    stillPlaying = false;
+	  } else { //switch the player
+	    if (playerMove == X_MOVE) {
+	      playerMove = O_MOVE;
+	      playerChar = 'O';
+	    } else {
+	      playerMove = X_MOVE;
+	      playerChar = 'X';
+	    }
+	  }
+	} else {
+	  cout << "This spot is already taken!" << endl;
+	}
       }
     }
     
@@ -74,6 +89,7 @@ int main() {
     cout << "Play Again? y/n" << endl << "> ";
     char answer;
     cin >> answer;
+    cin.ignore(); //ignore the terminating character
     if (answer == 'n') {
       cout << "Bye bye!";
       playAgain = false;
@@ -119,7 +135,7 @@ bool CheckTie(int grid[][3]) {
   int blankCount = 0;
   for (int y = 0; y < 3; y++) {
     for (int x = 0; x < 3; x++) {
-      if (grid[x][y] == 0) blankCount++;
+      if (grid[x][y] == BLANK) blankCount++; //see if all spots are taken (but no win)
     }
   }
   if (blankCount == 0) {
